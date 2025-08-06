@@ -1,0 +1,336 @@
+# AutoML Configuration for Crypto Trading Bot
+
+# Feature Engineering Configuration
+feature_engineering:
+  technical_indicators:
+    enabled: true
+    trend_indicators:
+      sma_periods: [5, 10, 20, 50, 100, 200]
+      ema_periods: [5, 10, 20, 50, 100, 200]
+      macd_params:
+        fast: 12
+        slow: 26
+        signal: 9
+      adx_period: 14
+    
+    momentum_indicators:
+      rsi_periods: [14, 21, 30]
+      stoch_params:
+        fastk: 14
+        slowk: 3
+        slowd: 3
+      cci_period: 20
+      williams_r_period: 14
+    
+    volatility_indicators:
+      bb_period: 20
+      bb_std: 2
+      atr_period: 14
+      keltner_period: 20
+      keltner_multiplier: 2
+    
+    volume_indicators:
+      obv_enabled: true
+      vwap_periods: [20, 50]
+      mfi_period: 14
+    
+    crypto_specific:
+      funding_rate_lookback: 24
+      basis_calculation: "perpetual_spot"
+      whale_threshold: 1000000  # USD
+
+  market_microstructure:
+    enabled: true
+    order_book:
+      depth_levels: 10
+      imbalance_periods: [5, 10, 20]
+      pressure_periods: [5, 15, 30]
+    
+    trade_analysis:
+      size_quantiles: [0.5, 0.75, 0.9, 0.95, 0.99]
+      aggressor_threshold: 0.6
+      block_size_threshold: 100000
+    
+    liquidity:
+      spread_periods: [1, 5, 15]
+      depth_threshold: [1000, 5000, 10000]
+      impact_sizes: [1000, 10000, 50000]
+
+  sentiment_features:
+    enabled: true
+    sources:
+      twitter_weight: 0.4
+      reddit_weight: 0.3
+      news_weight: 0.3
+    
+    processing:
+      text_cleaning: true
+      remove_stopwords: true
+      handle_crypto_slang: true
+      min_text_length: 10
+    
+    indicators:
+      sentiment_periods: [1, 4, 12, 24, 168]  # hours
+      volatility_sentiment_correlation_period: 24
+      trend_sentiment_correlation_period: 168
+
+  pattern_recognition:
+    enabled: true
+    candlestick:
+      body_threshold: 0.001
+      wick_threshold: 0.0005
+      doji_threshold: 0.0002
+    
+    support_resistance:
+      lookback_periods: [20, 50, 100]
+      touch_threshold: 0.002
+      min_touches: 2
+      strength_periods: [5, 10, 20]
+    
+    chart_patterns:
+      triangle_min_periods: 20
+      triangle_max_periods: 100
+      flag_min_periods: 5
+      flag_max_periods: 20
+      head_shoulders_periods: 50
+
+  feature_selection:
+    variance_threshold: 0.01
+    correlation_threshold: 0.95
+    mutual_info_percentile: 50
+    max_features: 100
+    stability_threshold: 0.7
+    regime_aware: true
+
+# Model Selection Configuration
+model_selection:
+  model_registry:
+    available_models:
+      - xgboost
+      - randomforest
+      - svm
+      - lstm
+      - transformer
+      - mlp
+    
+    default_task_type: "regression"
+    
+  hyperparameter_optimization:
+    n_trials: 100
+    timeout: 3600  # 1 hour
+    direction: "maximize"
+    pruner: "median"
+    sampler: "tpe"
+    
+    cross_validation:
+      cv_folds: 5
+      time_series_split: true
+      test_size: 0.2
+      gap: 1
+    
+    metrics:
+      primary_metric: "sharpe_ratio"
+      secondary_metrics: ["returns", "max_drawdown", "win_rate"]
+
+  ensemble_management:
+    combination_methods:
+      default_method: "adaptive_weighted"
+      available_methods: ["simple_average", "weighted_average", "adaptive_weighted", "stacked", "voting"]
+    
+    weight_update:
+      update_frequency: 24  # hours
+      lookback_period: 168  # hours
+      decay_factor: 0.95
+      min_weight: 0.01
+      max_weight: 0.6
+    
+    regime_awareness:
+      enabled: true
+      regime_lookback: 72
+    
+    meta_learning:
+      enabled: true
+      meta_model_type: "linear"
+      feature_engineering: true
+      cross_validation: true
+
+  meta_learning:
+    model_selection:
+      selection_method: "performance_based"
+      performance_window: 168
+      min_samples_for_selection: 100
+      exploration_rate: 0.1
+    
+    transfer_learning:
+      enabled: true
+      similarity_threshold: 0.8
+      adaptation_rate: 0.1
+      knowledge_decay: 0.99
+
+# Regime Detection Configuration
+regime_detection:
+  volatility_regimes:
+    enabled: true
+    detection_methods:
+      threshold_based: true
+      garch_based: true
+      clustering_based: true
+      hmm_based: false
+    
+    volatility_estimation:
+      method: "realized_volatility"
+      window: 24
+      annualization_factor: 8760  # 365 * 24 for hourly data
+    
+    threshold_regimes:
+      low_vol_percentile: 25
+      high_vol_percentile: 75
+      extreme_vol_percentile: 95
+    
+    clustering:
+      n_clusters: 3
+      cluster_method: "kmeans"
+      features: ["volatility", "volatility_ma", "volatility_std"]
+
+  trend_detection:
+    enabled: true
+    methods: ["linear_regression", "moving_average", "peak_trough"]
+    lookback_periods: [20, 50, 100, 200]
+    strength_threshold: 0.6
+    angle_threshold: 0.1
+    
+    moving_averages:
+      short_period: 20
+      medium_period: 50
+      long_period: 200
+    
+    support_resistance:
+      window_size: 20
+      min_touches: 2
+      touch_tolerance: 0.02
+    
+    reversal_detection:
+      enabled: true
+      divergence_threshold: 0.3
+      volume_confirmation: true
+      pattern_recognition: true
+
+# Strategy Generation Configuration
+strategy_generation:
+  signal_calibration:
+    enabled: true
+    strength_normalization: true
+    multi_signal_combination: "weighted"
+    confirmation_required: true
+    
+  position_sizing:
+    method: "kelly_criterion"  # kelly_criterion, fixed_fraction, volatility_adjusted
+    max_position_size: 0.1  # 10% of portfolio
+    min_position_size: 0.001  # 0.1% of portfolio
+    volatility_lookback: 168  # hours
+    
+  risk_management:
+    max_drawdown_limit: 0.15  # 15%
+    stop_loss_method: "atr_based"  # atr_based, percentage, dynamic
+    take_profit_ratio: 2.0  # risk:reward ratio
+    correlation_limit: 0.7  # maximum position correlation
+
+# Monitoring Configuration
+monitoring:
+  performance_tracking:
+    enabled: true
+    metrics_to_track:
+      - "returns"
+      - "sharpe_ratio"
+      - "max_drawdown"
+      - "win_rate"
+      - "profit_factor"
+    
+    update_frequency: 1  # hours
+    rolling_windows: [24, 168, 720]  # 1 day, 1 week, 1 month
+    
+  drift_detection:
+    enabled: true
+    methods: ["statistical", "model_based", "performance_based"]
+    detection_window: 168  # hours
+    significance_threshold: 0.05
+    
+  retraining:
+    enabled: true
+    triggers:
+      - "performance_degradation"
+      - "concept_drift"
+      - "scheduled"
+    
+    performance_threshold: 0.1  # 10% degradation
+    drift_threshold: 0.05
+    scheduled_interval: 168  # hours
+    
+    retraining_data_window: 2160  # hours (90 days)
+    validation_split: 0.2
+
+# Data Configuration
+data:
+  sources:
+    price_data:
+      primary: "binance"
+      backup: ["coinbase", "kraken"]
+      update_frequency: 1  # minutes
+      
+    order_book:
+      enabled: false  # Requires special data feed
+      depth: 10
+      update_frequency: 1  # seconds
+      
+    social_sentiment:
+      enabled: false  # Requires API keys
+      sources: ["twitter", "reddit"]
+      update_frequency: 60  # minutes
+      
+    news_sentiment:
+      enabled: false  # Requires API keys
+      sources: ["coindesk", "cointelegraph"]
+      update_frequency: 60  # minutes
+  
+  preprocessing:
+    outlier_removal: true
+    outlier_method: "iqr"  # iqr, zscore, isolation_forest
+    missing_value_handling: "forward_fill"
+    normalization: false  # Applied per model as needed
+    
+  storage:
+    local_cache: true
+    cache_duration: 24  # hours
+    database_backend: "sqlite"  # sqlite, postgresql, mongodb
+    backup_enabled: true
+
+# Logging Configuration
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {name}:{function}:{line} - {message}"
+  rotation: "1 week"
+  retention: "30 days"
+  
+  destinations:
+    console: true
+    file: true
+    file_path: "logs/automl.log"
+
+# General Configuration
+general:
+  random_seed: 42
+  n_jobs: -1  # Use all available cores
+  memory_limit: "8GB"
+  gpu_enabled: false
+  
+  trading:
+    universe: ["BTC/USDT", "ETH/USDT", "BNB/USDT"]  # Trading pairs
+    timeframe: "1h"  # Primary timeframe
+    lookback_period: 720  # hours (30 days)
+    
+  backtesting:
+    enabled: true
+    start_date: "2023-01-01"
+    end_date: "2024-01-01"
+    initial_capital: 10000  # USD
+    transaction_costs: 0.001  # 0.1%
